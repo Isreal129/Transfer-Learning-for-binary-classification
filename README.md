@@ -79,7 +79,7 @@ for layer in pre_trained_model.layers:
 
 pre_trained_model.summary()
 # Write Your Code
-print('Name: A.ARUVI.     Register Number: 212222230014.')
+print('Name: ISREAL MOSES B.     Register Number: 212221040060.')
 
 last_layer = pre_trained_model.get_layer('mixed7')
 print('last layer output shape: ', last_layer.output.shape)
@@ -170,7 +170,7 @@ zip_ref.extractall('/tmp/validation')
 zip_ref.close()
 
 model.summary()
-print("Name: A.ARUVI  Reg No: 212222230014")
+print("Name: ISREAL MOSES B  Reg No: 212221040060")
 
 # Define our example directories and files
 train_dir = '/tmp/training'
@@ -252,13 +252,13 @@ epochs = range(len(acc))
 
 plt.plot(epochs, acc, 'r', label='Training accuracy')
 plt.plot(epochs, val_acc, 'b', label='Validation accuracy')
-plt.title('Name: A.ARUVI     Register Number: 212222230014.   ')
+plt.title('Name: ISREAL MOSES B     Register Number: 212221040060.   ')
 plt.title('Training and validation accuracy')
 plt.legend(loc=0)
 plt.figure()
 plt.plot(epochs, loss, 'r', label='Training loss')
 plt.plot(epochs, val_loss, 'b', label='Validation Loss')
-plt.title('Name:A.ARUVI     Register Number: 212222230014.   ')
+plt.title('Name:ISREAL MOSES B     Register Number: 212221040060.   ')
 plt.title('Training and validation Loss')
 plt.legend(loc=0)
 plt.figure()
