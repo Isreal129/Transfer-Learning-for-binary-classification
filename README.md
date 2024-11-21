@@ -1,295 +1,149 @@
-# Transfer-Learning-for-binary-classification
-## Aim
-To Implement Transfer Learning for Horses_vs_humans dataset classification using InceptionV3 architecture.
+# Implementation-of-CNN
+
+## AIM
+
+To Develop a convolutional deep neural network for digit classification.
+
 ## Problem Statement and Dataset
-The goal of this project is to build a machine learning model capable of accurately classifying images as either a horse or a human. This binary image classification problem involves the use of Convolutional Neural Networks (CNNs) to extract meaningful patterns and features from input images and distinguish between the two classes.
+Develop a model that can classify images of handwritten digits (0-9) from the MNIST dataset with high accuracy. The model should use a convolutional 
+neural network architecture and be optimized using early stopping to avoid overfitting.
 
-![image](https://github.com/user-attachments/assets/0900eec5-7dbf-4370-8629-cd0a461e2442)
+## Neural Network Model
 
-</br>
-</br>
-</br>
+![Screenshot 2024-09-23 105356](https://github.com/user-attachments/assets/eaf9841d-2555-428e-a642-58b245b237c8)
+
 
 ## DESIGN STEPS
-### Step 1: Load and prepare image data for training and validation.
 
-### Step 2: Build a model using pre-trained InceptionV3 with additional layers for binary classification.
+### STEP 1:
+Import the necessary libraries and  load the dataset
 
-### Step 3: Train the model on the data and stop early when accuracy reaches 97%.
+### STEP 2:
+Reshape and normalize the data 
 
-### Step 4: Plot the accuracy and loss for both training and validation.
+### STEP 3:
+Create the EarlyStoppingCallback function 
+
+### STEP 4:
+Create the convulational model and compile the model
+
+### STEP 5:
+Train the model
 
 ## PROGRAM
-Include your code here
+
+### Name: Isreal Moses B
+### Register Number: 212221040060
+
+
 ```python
-# Import all the necessary files!
 import os
+import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.keras import Model
-from os import getcwd
+# Provide path to get the full path
+data_path = os.path.join( "mnist.npz")
 
-# GRADED FUNCTION: train_val_datasets
+# Load data (discard test set)
+(training_images, training_labels), _ = tf.keras.datasets.mnist.load_data(path=data_path)
 
-def train_val_datasets():
-    """Creates training and validation datasets
+print(f"training_images is of type {type(training_images)}.\ntraining_labels is of type {type(training_labels)}\n")
 
-    Returns:
-        (tf.data.Dataset, tf.data.Dataset): training and validation datasets
-    """
+# Inspect shape of the data
+data_shape = training_images.shape
 
-    ### START CODE HERE ###
+print(f"There are {data_shape[0]} examples with shape ({data_shape[1]}, {data_shape[2]})")
+print('Name:Isreal Moses           Register Number:212221040060   \n')
+import numpy as np
 
-    training_dataset = tf.keras.utils.image_dataset_from_directory( 
-        directory='/content/horse-or-human.zip/',
-        batch_size=32,
-        image_size=(150,150),
-        shuffle=True, 
-        seed=7 
-    ) 
-    
-    validation_dataset = tf.keras.utils.image_dataset_from_directory( 
-        directory='/content/validation-horse-or-human.zip',
-        batch_size=32,
-        image_size=(150,150),
-        shuffle=True, 
-        seed=7 
-    ) 
-
-    ### END CODE HERE ###
-                                                                        
-    return training_dataset, validation_dataset
-
-path_inception = '/content/inception_v3_weights_tf_dim_ordering_tf_kernels_notop (1).h5'
-
-# Import the inception model
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-
-# Create an instance of the inception model from the local pre-trained weights
-local_weights_file ='/content/inception_v3_weights_tf_dim_ordering_tf_kernels_notop (1).h5'
-pre_trained_model = InceptionV3(include_top = False,
-                                input_shape = (150, 150, 3),
-                                weights = None)
-
-pre_trained_model.load_weights(local_weights_file)
-
-# Make all the layers in the pre-trained model non-trainable
-for layer in pre_trained_model.layers:
-    layers.trainable = False
-
-pre_trained_model.summary()
-# Write Your Code
-print('Name: ISREAL MOSES B.     Register Number: 212221040060.')
-
-last_layer = pre_trained_model.get_layer('mixed7')
-print('last layer output shape: ', last_layer.output.shape)
-last_output = last_layer.output
-
-# Expected Output:
-# ('last layer output shape: ', (None, 7, 7, 768))
-
-# Define a Callback class that stops training once accuracy reaches 99.9%
-class EarlyStoppingCallback(tf.keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs=None):
-        if logs['accuracy']>0.970:
-            self.model.stop_training = True
-            print("\nReached 97.0% accuracy so cancelling training!")
-
-# GRADED FUNCTION: output_of_last_layer
-
-def output_of_last_layer(pre_trained_model):
-    """Fetches the output of the last desired layer of the pre-trained model
+# GRADED FUNCTION: reshape_and_normalize
+def reshape_and_normalize(images):
+    """Reshapes the array of images and normalizes pixel values.
 
     Args:
-        pre_trained_model (tf.keras.Model): pre-trained model
+        images (numpy.ndarray): The images encoded as numpy arrays
 
     Returns:
-        tf.keras.KerasTensor: last desired layer of pretrained model
+        numpy.ndarray: The reshaped and normalized images.
     """
+    
     ### START CODE HERE ###
 
-    last_desired_layer = pre_trained_model.get_layer('mixed7')
-    last_output = last_desired_layer.output
+    # Reshape the images to add an extra dimension (at the right-most side of the array)
+    images = images.reshape(images.shape[0], images.shape[1], images.shape[2], 1)  # Add the channel dimension
     
-    print('last layer output shape: ', last_output.shape)
-    
+    # Normalize pixel values
+    images = images / 255.0  # Divide by the maximum pixel value (255 for images)
+
     ### END CODE HERE ###
 
-    return last_output
+    return images
+# Reload the images in case you run this cell multiple times
+(training_images, _), _ = tf.keras.datasets.mnist.load_data(path=data_path)
 
-# Import all the necessary files!
-import os
-import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.keras import Model
-from os import getcwd
-from tensorflow.keras.optimizers import RMSprop
-def create_final_model(pre_trained_model, last_output):
+# Apply your function
+training_images = reshape_and_normalize(training_images)
 
- # Flatten the output layer of the pretrained model to 1 dimension
-    x = tf.keras.layers.Flatten()(last_output)
+print(f"Maximum pixel value after normalization: {np.max(training_images)}\n")
+print(f"Shape of training set after reshaping: {training_images.shape}\n")
+print(f"Shape of one image after reshaping: {training_images[0].shape}")
 
-    ### START CODE HERE ###
+# GRADED CLASS: EarlyStoppingCallback
+class EarlyStoppingCallback(tf.keras.callbacks.Callback):
 
-    # Add a fully connected layer with 1024 hidden units and ReLU activation
-    x = tf.keras.layers.Dense(1024, activation='relu')(x)
-    # Add a dropout rate of 0.2
-    x = tf.keras.layers.Dropout(0.2)(x) 
-    # Add a final sigmoid layer for classification
-    x = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-    model = Model(inputs=pre_trained_model.input, outputs=x)
- # Compile the model
-    model.compile( 
-        optimizer=tf.keras.optimizers.RMSprop(learning_rate=0.00001), 
-        loss='binary_crossentropy', # use a loss for binary classification
-        metrics=['accuracy'] 
+    # Define the correct function signature for on_epoch_end method
+    def on_epoch_end(self, epoch, logs=None):
+        # Check if the accuracy is greater or equal to 0.98
+        if logs.get('accuracy') >= 0.995:
+            # Stop training once the above condition is met
+            self.model.stop_training = True
+            print("\nReached 99.5% accuracy so cancelling training!") 
+            
+# GRADED FUNCTION: convolutional_model
+def convolutional_model():
+    """Returns the compiled (but untrained) convolutional model.
+
+    Returns:
+        tf.keras.Model: The model which should implement convolutions.
+    """
+
+    
+    
+    # Define the model
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),  # Convolutional layer
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),  # Max pooling layer
+        tf.keras.layers.Flatten(),  # Flatten the output
+        tf.keras.layers.Dense(64, activation='relu'),  # Dense layer with 64 neurons
+        tf.keras.layers.Dense(10, activation='softmax')  # Output layer for 10 classes
+    ]) 
+
+   
+
+    # Compile the model
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
     )
-
-    ### END CODE HERE ###
+          
     return model
-
-model = create_final_model(pre_trained_model, last_output)
-
-# Get the Horse or Human dataset
-path_horse_or_human = '/content/horse-or-human.zip'
-# Get the Horse or Human Validation dataset
-path_validation_horse_or_human = '/content/validation-horse-or-human.zip'
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
-import os
-import zipfile
-
-local_zip = path_horse_or_human
-zip_ref = zipfile.ZipFile(local_zip, 'r')
-zip_ref.extractall('/tmp/training')
-zip_ref.close()
-
-local_zip = path_validation_horse_or_human
-zip_ref = zipfile.ZipFile(local_zip, 'r')
-zip_ref.extractall('/tmp/validation')
-zip_ref.close()
-
-model.summary()
-print("Name: ISREAL MOSES B  Reg No: 212221040060")
-
-# Define our example directories and files
-train_dir = '/tmp/training'
-validation_dir = '/tmp/validation'
-
-train_horses_dir = os.path.join(train_dir, 'horses')
-train_humans_dir = os.path.join(train_dir, 'humans')
-validation_horses_dir = os.path.join(validation_dir, 'horses')
-validation_humans_dir = os.path.join(validation_dir, 'humans')
-
-train_horses_fnames = os.listdir(train_horses_dir)
-train_humans_fnames = os.listdir(train_humans_dir)
-validation_horses_fnames = os.listdir(validation_horses_dir)
-validation_humans_fnames = os.listdir(validation_humans_dir)
-
-print(len(train_horses_fnames))
-print(len(train_humans_fnames))
-print(len(validation_horses_fnames))
-print(len(validation_humans_fnames))
-
-# Expected Output:
-# 500
-# 527
-# 128
-# 128
-
-# Add our data-augmentation parameters to ImageDataGenerator
-train_datagen = ImageDataGenerator(rescale = 1/255,
-                                  height_shift_range = 0.2,
-                                  width_shift_range = 0.2,
-                                  horizontal_flip = True,
-                                  vertical_flip = True,
-                                  rotation_range = 0.4,
-                                  shear_range = 0.1,
-                                  zoom_range = 0.3,
-                                  fill_mode = 'nearest'
-                                  )
-
-# Note that the validation data should not be augmented!
-test_datagen = ImageDataGenerator(rescale = 1/255)
-
-# Flow training images in batches of 20 using train_datagen generator
-train_generator = train_datagen.flow_from_directory(train_dir,
-                                                   target_size = (150, 150),
-                                                   batch_size = 20,
-                                                   class_mode = 'binary',
-                                                   shuffle = True)
-
-# Flow validation images in batches of 20 using test_datagen generator
-validation_generator =  test_datagen.flow_from_directory(validation_dir,
-                                                        target_size = (150, 150),
-                                                        batch_size =20,
-                                                        class_mode = 'binary',
-                                                        shuffle = False)
-
-# Expected Output:
-# Found 1027 images belonging to 2 classes.
-# Found 256 images belonging to 2 classes.
-
-# Run this and see how many epochs it should take before the callback
-# fires, and stops training at 97% accuracy
-
-callbacks = EarlyStoppingCallback()
-history = model.fit(train_generator,
-    validation_data = validation_generator,
-    epochs = 100,
-    verbose = 2,
-    callbacks = [EarlyStoppingCallback()],
-)
-
-%matplotlib inline
-import matplotlib.pyplot as plt
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-epochs = range(len(acc))
-
-plt.plot(epochs, acc, 'r', label='Training accuracy')
-plt.plot(epochs, val_acc, 'b', label='Validation accuracy')
-plt.title('Name: ISREAL MOSES B     Register Number: 212221040060.   ')
-plt.title('Training and validation accuracy')
-plt.legend(loc=0)
-plt.figure()
-plt.plot(epochs, loss, 'r', label='Training loss')
-plt.plot(epochs, val_loss, 'b', label='Validation Loss')
-plt.title('Name:ISREAL MOSES B     Register Number: 212221040060.   ')
-plt.title('Training and validation Loss')
-plt.legend(loc=0)
-plt.figure()
-
-
-plt.show()
-
-
+model = convolutional_model()
+# Train your model (this can take up to 5 minutes)
+training_history = model.fit(training_images, training_labels, epochs=10, callbacks=[EarlyStoppingCallback()])
 ```
 
-
 ## OUTPUT
-### Training Accuracy, Validation Accuracy Vs Iteration Plot
 
-![image](https://github.com/user-attachments/assets/d391c1e1-1ced-4473-bc28-fddd8d902119)
-
-
-### Training Loss, Validation Loss Vs Iteration Plot
-
-![image](https://github.com/user-attachments/assets/04c00f28-2368-4d2b-9c70-7ee9f953586b)
+### Reshape and Normalize output
+![Screenshot 2024-09-16 111126](https://github.com/user-attachments/assets/f1096f05-1ce8-4051-ad8b-ea432f895ad5)
 
 
 
-### Conclusion
+### Training the model output
+![Screenshot 2024-09-16 111140](https://github.com/user-attachments/assets/9f71ea39-5ff0-4844-a330-cb25141deb55)
 
-![image](https://github.com/user-attachments/assets/7b8c2e8d-bfa7-4fa2-9995-404370c9c67c)
+
+
 
 ## RESULT
-
-Thus, transfer learning for classifying horses and human is implemented successfully
-
-
-
-
+Hence a convolutional deep neural network for digit classification was successfully developed.
